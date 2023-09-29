@@ -26,6 +26,7 @@ const inputElevation = document.querySelector(".form__input--elevation");
 let map;
 let mapEvent;
 
+/*
 if (navigator.geolocation)
   navigator.geolocation.getCurrentPosition(
     function (position) {
@@ -56,6 +57,7 @@ if (navigator.geolocation)
     }
   );
 
+
 form.addEventListener("submit", function (event) {
   event.preventDefault();
   inputDistance.value =
@@ -79,8 +81,78 @@ form.addEventListener("submit", function (event) {
     .setPopupContent("Тренировка")
     .openPopup();
 });
+  */
 
 inputType.addEventListener("change", function () {
   inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
   inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
 });
+
+/*---------------12.6 Рефакторинг в синтаксис классов -------------*/
+class App {
+  _map;
+  _mapEvent;
+  constructor() {
+    this._getPosition();
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      inputDistance.value =
+        inputDuration.value =
+        inputCadence.value =
+        inputElevation.value =
+          "";
+      console.log(mapEvent);
+      const { lat, lng } = mapEvent.latlng;
+      L.marker([lat, lng])
+        .addTo(map)
+        .bindPopup(
+          L.popup({
+            maxWidth: 250,
+            minWidth: 100,
+            autoClose: false,
+            closeOnClick: false,
+            className: "mark-popup",
+          })
+        )
+        .setPopupContent("Тренировка")
+        .openPopup();
+    });
+  }
+  _getPosition() {
+    if (navigator.geolocation)
+      navigator.geolocation.getCurrentPosition(
+        this._loadMap.bind(this),
+
+        //модальное окно в случае отказа
+        function () {
+          alert("Вы не предоставили доступ к своей локации");
+        }
+      );
+  }
+  _loadMap(position) {
+    const { latitude } = position.coords;
+    const { longitude } = position.coords;
+    const coords = [latitude, longitude];
+    console.log(this);
+    this._map = L.map("map").setView(coords, 13);
+    console.log(this._map);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(this._map);
+
+    console.log(this);
+    this._map.on("click", this._showForm.bind(this));
+  }
+
+  _showForm(mapE) {
+    this._mapEvent = mapE;
+    form.classList.remove("hidden");
+    inputDistance.focus();
+  }
+  _toogleField() {}
+  _newWorkout() {}
+}
+
+const app = new App();
+app._getPosition;
