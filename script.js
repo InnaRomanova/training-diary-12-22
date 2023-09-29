@@ -83,41 +83,22 @@ form.addEventListener("submit", function (event) {
 });
   */
 
-inputType.addEventListener("change", function () {
-  inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
-  inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
-});
-
 /*---------------12.6 Рефакторинг в синтаксис классов -------------*/
 class App {
   _map;
   _mapEvent;
   constructor() {
+    //запуск логики приложения
     this._getPosition();
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      inputDistance.value =
-        inputDuration.value =
-        inputCadence.value =
-        inputElevation.value =
-          "";
-      console.log(mapEvent);
-      const { lat, lng } = mapEvent.latlng;
-      L.marker([lat, lng])
-        .addTo(map)
-        .bindPopup(
-          L.popup({
-            maxWidth: 250,
-            minWidth: 100,
-            autoClose: false,
-            closeOnClick: false,
-            className: "mark-popup",
-          })
-        )
-        .setPopupContent("Тренировка")
-        .openPopup();
-    });
+
+    //обработчик события, который вызывает метод _newWorkout
+    form.addEventListener("submit", this._newWorkout.bind(this));
+
+    //обработчик события, который вызывает метод _toggleField
+    inputType.addEventListener("change", this._toogleField);
   }
+
+  //метод запроса о местоположении от пользователя. Если true? запускаетс метод _loadMap
   _getPosition() {
     if (navigator.geolocation)
       navigator.geolocation.getCurrentPosition(
@@ -129,6 +110,8 @@ class App {
         }
       );
   }
+
+  //метод загрузки карты, если положительный ответ по координатам
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
@@ -142,16 +125,48 @@ class App {
     }).addTo(this._map);
 
     console.log(this);
+
+    //обработчик события нажатия на карте. Запускает метод _showForm
     this._map.on("click", this._showForm.bind(this));
   }
 
+  //метод отображает форму по клику на карте
   _showForm(mapE) {
     this._mapEvent = mapE;
     form.classList.remove("hidden");
     inputDistance.focus();
   }
-  _toogleField() {}
-  _newWorkout() {}
+
+  //метод переключает типы тренировок
+  _toogleField() {
+    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
+    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+  }
+
+  //метод отображает/устанавливает маркер на карте
+  _newWorkout(event) {
+    event.preventDefault();
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        "";
+    console.log(this._mapEvent);
+    const { lat, lng } = this._mapEvent.latlng;
+    L.marker([lat, lng])
+      .addTo(this._map)
+      .bindPopup(
+        L.popup({
+          maxWidth: 250,
+          minWidth: 100,
+          autoClose: false,
+          closeOnClick: false,
+          className: "mark-popup",
+        })
+      )
+      .setPopupContent("Тренировка")
+      .openPopup();
+  }
 }
 
 const app = new App();
