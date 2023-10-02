@@ -23,8 +23,6 @@ const inputDistance = document.querySelector(".form__input--distance");
 const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
-let map;
-let mapEvent;
 
 /*
 if (navigator.geolocation)
@@ -84,6 +82,55 @@ form.addEventListener("submit", function (event) {
   */
 
 /*---------------12.6 Рефакторинг в синтаксис классов -------------*/
+
+// let map;
+// let mapEvent;
+
+//уникальный идентификатор
+console.log((Date.now() + "").slice(-10));
+class Workout {
+  date = new Date();
+  id = (Date.now() + "").slice(-10);
+  constructor(coords, distance, duration) {
+    this.coords = this.coords;
+    this.distance = this.distance;
+    this.duration = this.duration;
+  }
+}
+
+//класс пробежки
+class Dunning extends Workout {
+  constructor(coords, distance, duration, cadens) {
+    super(coords, distance, duration);
+    this.cadens = cadens;
+    this.calcPace();
+  }
+
+  calcPace() {
+    this.pace = this.duration / this.distance;
+    return this.pace;
+  }
+}
+
+class Cycling extends Dunning {
+  constructor(coords, distance, duration, elevation) {
+    super(coords, distance, duration);
+    this.elevation = elevation;
+    this.calcSpeed();
+  }
+
+  //вычисление скорости
+  calcSpeed() {
+    this.speed = this.distance / (this.duration / 60);
+    return this.speed;
+  }
+}
+
+const run1 = new Dunning([-5, 5], 5, 10, 150);
+const cycl1 = new Cycling([-5, 5], 15, 90, 150);
+console.log(run1);
+console.log(cycl1);
+
 class App {
   _map;
   _mapEvent;
