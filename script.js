@@ -128,10 +128,9 @@ class Cycling extends Dunning {
 
 const run1 = new Dunning([-5, 5], 5, 10, 150);
 const cycl1 = new Cycling([-5, 5], 15, 90, 150);
-console.log(run1);
-console.log(cycl1);
 
 class App {
+  _workouts;
   _map;
   _mapEvent;
   constructor() {
@@ -193,14 +192,69 @@ class App {
   //метод отображает/устанавливает маркер на карте
   _newWorkout(event) {
     event.preventDefault();
-    inputDistance.value =
-      inputDuration.value =
-      inputCadence.value =
-      inputElevation.value =
-        "";
-    console.log(this._mapEvent);
+
+    const validInputs = (...inputs) =>
+      inputs.every((inp) => Number.isFinite(inp));
+
+    //функция проверки положитеьлного числа, чтобы не было отрицательных
+    const allPositiv = (...inputs) => inputs.every((inp) => inp > 0);
+
+    //данные из форм
+    const type = inputType.value;
+    const distance = +inputDistance.value;
+    const duration = +inputDuration.value;
     const { lat, lng } = this._mapEvent.latlng;
-    L.marker([lat, lng])
+    let workout;
+
+    if (type === "running") {
+      const cadence = +inputCadence.value;
+
+      //проверяет, если оно число
+      if (
+        // !Number.isFinite(distance) ||
+        // !Number.isFinite(duration) ||
+        // !Number.isFinite(cadence)
+        !validInputs(distance, duration, cadence) ||
+        !allPositiv(distance, duration, cadence)
+      ) {
+        return alert("необходимо ввести целое положительное число");
+      }
+      workout = new Dunning([lat, lng], distance, duration, cadence);
+    }
+
+    if (type === "cycling") {
+      //подъем может как отрицательным, так и положительным числом
+      const elevation = +inputElevation.value;
+
+      //проверяет, если оно число
+      if (
+        // !Number.isFinite(distance) ||
+        // !Number.isFinite(duration) ||
+        // !Number.isFinite(elevation)
+        !validInputs(distance, duration, elevation) ||
+        !allPositiv(distance, duration)
+      ) {
+        return alert("необходимо ввести целое положительное число");
+      }
+      //если это велосипед, создать велосипед
+      workout = new Cycling([lat, lng], distance, duration, elevation);
+    }
+    //добавить объект в массив workout
+    this._workouts.push(workout);
+    console.log(this.workouts);
+    //проверить, что данные корректны
+
+    //если это пробежка, создать объект пробежки
+
+    //если это велосипед, создать объект велосипед
+
+    //добавить объект в массив workout
+
+    //рендер маркера тренировки на карте
+    this.renderWorkMarket(workout);
+  }
+  renderWorkMarket(workout) {
+    L.marker(workout.coords)
       .addTo(this._map)
       .bindPopup(
         L.popup({
@@ -211,10 +265,18 @@ class App {
           className: "mark-popup",
         })
       )
-      .setPopupContent("Тренировка")
+      .setPopupContent("workout.distance")
       .openPopup();
   }
 }
+
+//отчистить поля ввода и спрятать форму
+
+inputDistance.value =
+  inputDuration.value =
+  inputCadence.value =
+  inputElevation.value =
+    "";
 
 const app = new App();
 app._getPosition;
