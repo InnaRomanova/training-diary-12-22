@@ -140,12 +140,15 @@ class App {
     // Запуск логики приложения
     this._getPosition();
 
+    //получение данных из LocalStorage
+    this._getLocalStorage();
+
     // Обработчик события который вызывает метод __newWorkout.
     form.addEventListener("submit", this._newWorkout.bind(this));
 
     // Обработчик события который вызывает метод _toogleField.
     inputType.addEventListener("change", this._toogleField);
-    // containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
+    containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
   }
   // Метод запроса данных о местоположении от пользовател. В случае успеха, запускается функция _loadMap
   _getPosition() {
@@ -246,6 +249,9 @@ class App {
 
     // Отчистить поля ввода и спрятать форму
     this._hideForm();
+
+    //LocalStorage
+    this._setLocalStorage();
   }
   _renderWorkMarke(workout) {
     L.marker(workout.coords)
@@ -322,6 +328,42 @@ class App {
       `;
     }
     form.insertAdjacentHTML("afterend", html);
+  }
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest(".workout");
+    console.log(workoutEl);
+    if (!workoutEl) return;
+
+    const workout = this._workouts.find(
+      (work) => work.id === workoutEl.dataset.id
+    );
+    this._map.setView(workout.coords, 13, {
+      animate: true,
+      pan: { duration: 1 },
+    });
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem("workouts", JSON.stringify(this._workouts));
+  }
+
+  //получение данных из LocalStorage
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem("workouts"));
+    console.log(data);
+
+    if (!data) return;
+
+    this._workouts = data;
+    this._workouts.forEach((work) => {
+      this._renderWorout(work);
+    });
+  }
+
+  //очищение localStorage
+  reset() {
+    localStorage.removeItem("workouts");
+    location.reload();
   }
 }
 
